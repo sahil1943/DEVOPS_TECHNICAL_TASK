@@ -1,7 +1,3 @@
-Step 1: Bash Script for System Monitoring (monitor.sh)
-bash
-Copy
-Edit
 #!/bin/bash
 
 # System Monitoring Script
