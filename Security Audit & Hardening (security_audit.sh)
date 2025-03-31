@@ -1,0 +1,16 @@
+Description:
+Automates Linux security audits and server hardening.
+
+Usage:
+Run the script:
+
+./security_audit.sh
+The script generates a log file security_audit.log with results.
+
+Setup Instructions
+Make scripts executable:
+
+chmod +x monitor.sh security_audit.sh
+Run with sudo (for security tasks):
+
+sudo ./security_audit.sh
