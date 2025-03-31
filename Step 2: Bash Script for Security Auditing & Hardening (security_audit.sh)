@@ -1,0 +1,57 @@
+#!/bin/bash
+
+# Security Audit & Hardening Script
+# Author: Your Name
+# Description: Automates security audits and server hardening for Linux servers.
+
+log_file="security_audit.log"
+
+echo "Security Audit - $(date)" | tee -a $log_file
+
+# Function to audit users and groups
+audit_users() {
+    echo "User & Group Audit:" | tee -a $log_file
+    awk -F: '$3 == 0 {print "Root-equivalent user:", $1}' /etc/passwd | tee -a $log_file
+    awk -F: '($2 == "" ) {print "User with empty password:", $1}' /etc/shadow | tee -a $log_file
+}
+
+# Function to check file permissions
+check_permissions() {
+    echo "Checking World-Writable Files:" | tee -a $log_file
+    find / -type f -perm -o+w 2>/dev/null | tee -a $log_file
+}
+
+# Function to check running services
+audit_services() {
+    echo "Service Audit:" | tee -a $log_file
+    systemctl list-units --type=service --state=running | tee -a $log_file
+}
+
+# Function to check open ports
+check_network() {
+    echo "Firewall & Network Security:" | tee -a $log_file
+    netstat -tulpn | tee -a $log_file
+}
+
+# Function to check security updates
+check_updates() {
+    echo "Checking for security updates..." | tee -a $log_file
+    sudo apt update && sudo apt list --upgradable | tee -a $log_file
+}
+
+# Function to apply hardening
+apply_hardening() {
+    echo "Applying security hardening..." | tee -a $log_file
+    sudo ufw enable | tee -a $log_file
+    sudo passwd -l root | tee -a $log_file
+}
+
+# Execute all audits
+audit_users
+check_permissions
+audit_services
+check_network
+check_updates
+apply_hardening
+
+echo "Security Audit Completed! Report saved in $log_file."
