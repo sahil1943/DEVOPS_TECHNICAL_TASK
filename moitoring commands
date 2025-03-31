@@ -1,0 +1,25 @@
+* monitor_cpu_mem():  For Top 10 CPU/Memory consuming apps.
+   * monitor_network(): For concurrent connections, packet drops, and data transfer.
+   * monitor_disk():  For disk space usage.
+   * monitor_load():  For system load and CPU usage breakdown.
+   * monitor_memory(): For memory and swap usage.
+   * monitor_processes():  For active and top CPU/memory processes.
+   * monitor_services():  For essential service status.
+   * display_dashboard():  To display all the information.
+ * Main Execution Block:
+   * Use getopt to handle command-line switches (-cpu, -memory, -network, etc.).
+ Top 10 CPU/Memory:  top, ps aux --sort=-pcpu, ps aux --sort=-pmem, head.
+ * Network:  netstat -an, ifconfig, iptables -L, sar -n DEV.
+ * Disk:  df -h, du -sh.
+ * System Load:  uptime, top.
+ * Memory:  free -h, /proc/swaps.
+ * Processes:  ps aux, top.
+ * Services:  systemctl status <service>, service <service> status.
+ Get Top 5 CPU Processes:
+    ps aux --sort=-pcpu | head -6
+
+ * Get Free Memory:
+    free -h | grep Mem | awk '{print "Total: " $2 ", Used: " $3 ", Free: " $4 }'
+
+ * Check Service Status (systemd):
+    systemctl status sshd
