@@ -75,3 +75,131 @@ case "$1" in
         done
         ;;
 esac
+
+
+###2nd way "DEVOPS MONITORING SECURITY"
+
+#!/bin/bash
+
+# System Monitoring and Security Audit Script
+# This script provides real-time monitoring of system resources and performs security audits.
+
+# Function to display CPU and Memory usage
+display_top_processes() {
+    echo "Top 10 CPU & Memory consuming applications:"
+    ps -eo pid,comm,%cpu,%mem --sort=-%cpu | head -11
+}
+
+# Function to monitor network activity
+display_network_stats() {
+    echo "Network Monitoring:"
+    echo "Active Connections: $(netstat -an | grep ESTABLISHED | wc -l)"
+    echo "Packet Drops: $(netstat -s | grep -i 'dropped' | awk '{print $1}')"
+    echo "Data Transfer:"
+    echo "In: $(cat /proc/net/dev | awk 'NR>2 {sum+=$2} END {print sum/1024/1024 " MB"}')"
+    echo "Out: $(cat /proc/net/dev | awk 'NR>2 {sum+=$10} END {print sum/1024/1024 " MB"}')"
+}
+
+# Function to monitor disk usage
+display_disk_usage() {
+    echo "Disk Usage:"
+    df -h | awk '{if ($5+0 > 80) print $0;}'
+}
+
+# Function to monitor system load
+display_system_load() {
+    echo "System Load:"
+    uptime
+    echo "CPU Usage:"; top -bn1 | grep "Cpu(s)"
+}
+
+# Function to monitor memory usage
+display_memory_usage() {
+    echo "Memory Usage:"
+    free -m
+}
+
+# Function to monitor services
+display_service_status() {
+    echo "Service Status:"
+    for service in sshd nginx apache2 iptables; do
+        systemctl is-active --quiet $service && echo "$service: RUNNING" || echo "$service: STOPPED"
+    done
+}
+
+# Function to perform security audit
+perform_security_audit() {
+    echo "Security Audit:"
+    echo "Listing all users and checking root privileges:"
+    awk -F: '$3 == 0 {print $1 " has root privileges"}' /etc/passwd
+
+    echo "Checking world-writable files:"
+    find / -type f -perm -o+w 2>/dev/null
+
+    echo "Checking for running services:"
+    systemctl list-units --type=service --state=running
+
+    echo "Checking firewall status:"
+    sudo ufw status || sudo iptables -L
+
+    echo "Checking open ports:"
+    netstat -tulpn | grep LISTEN
+
+    echo "Checking SSH security:"
+    grep -E 'PermitRootLogin|PasswordAuthentication' /etc/ssh/sshd_config
+}
+
+# Function to perform server hardening
+perform_server_hardening() {
+    echo "Applying security hardening..."
+    echo "Disabling root SSH login and enforcing key-based authentication."
+    sudo sed -i 's/^PermitRootLogin yes/PermitRootLogin no/' /etc/ssh/sshd_config
+    sudo sed -i 's/^PasswordAuthentication yes/PasswordAuthentication no/' /etc/ssh/sshd_config
+    sudo systemctl restart sshd
+
+    echo "Applying firewall rules..."
+    sudo ufw enable
+    sudo ufw allow OpenSSH
+    sudo ufw deny 23
+
+    echo "Setting up automatic updates..."
+    sudo apt install unattended-upgrades -y
+    sudo dpkg-reconfigure -plow unattended-upgrades
+}
+
+# Function to process command-line arguments
+while [[ "$1" ]]; do
+    case "$1" in
+        -cpu) display_system_load;;
+        -memory) display_memory_usage;;
+        -network) display_network_stats;;
+        -disk) display_disk_usage;;
+        -services) display_service_status;;
+        -processes) display_top_processes;;
+        -audit) perform_security_audit;;
+        -hardening) perform_server_hardening;;
+        *) echo "Invalid option: $1";;
+    esac
+    shift
+done
+
+# If no arguments are provided, display all
+echo "System Monitor Dashboard"
+display_system_load
+display_memory_usage
+display_network_stats
+display_disk_usage
+display_service_status
+display_top_processes
+perform_security_audit
+
+
+
+
+
+
+
+
+
+
+
